@@ -1,0 +1,11 @@
+venv/
+__pycache__/
+*.pyc
+.env
+
+workspace/
+memory/
+project_index/
+
+*.log
+*.sqlite
