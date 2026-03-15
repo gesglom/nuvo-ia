@@ -44,13 +44,18 @@ Agentes disponibles:
 Devuelve SOLO JSON así:
 
 [
-{{"agent": "architect_agent", "task": "diseñar arquitectura"}},
-{{"agent": "backend_engineer", "task": "crear API"}},
-{{"agent": "frontend_engineer", "task": "crear interfaz"}}
+ {{"agent": "architect_agent", "task": "diseñar arquitectura"}},
+ {{"agent": "backend_engineer", "task": "crear API"}},
+ {{"agent": "frontend_engineer", "task": "crear interfaz"}}
 ]
 """
 
     result = ask_qwen(prompt)
+
+    # limpiar markdown que devuelve el modelo
+    result = result.replace("```json", "")
+    result = result.replace("```", "")
+    result = result.strip()
 
     try:
 
