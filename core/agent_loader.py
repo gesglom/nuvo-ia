@@ -1,30 +1,34 @@
-import os
 import importlib
+import os
 
+from core.base_agent import BaseAgent
 
 AGENTS_FOLDER = "agents"
 
 
 def load_agents():
-
+    """Carga agentes de forma dinámica (hot-loading) en cada invocación."""
+    importlib.invalidate_caches()
     agents = {}
 
     for file in os.listdir(AGENTS_FOLDER):
+        if not file.endswith(".py") or file.startswith("_"):
+            continue
 
-        if file.endswith(".py") and not file.startswith("_"):
+        module_name = file[:-3]
+        fqmn = f"agents.{module_name}"
 
-            module_name = file[:-3]
+        try:
+            module = importlib.import_module(fqmn)
+            module = importlib.reload(module)
+        except Exception as exc:
+            print(f"No se pudo cargar módulo {fqmn}: {exc}")
+            continue
 
-            module = importlib.import_module(f"agents.{module_name}")
-
-            for attr in dir(module):
-
-                obj = getattr(module, attr)
-
-                if isinstance(obj, type):
-
-                    if attr.endswith("Agent"):
-
-                        agents[module_name] = obj()
+        for attr in dir(module):
+            obj = getattr(module, attr)
+            if isinstance(obj, type) and issubclass(obj, BaseAgent) and obj is not BaseAgent:
+                agents[module_name] = obj()
+                break
 
     return agents

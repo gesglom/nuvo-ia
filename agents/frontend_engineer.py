@@ -1,12 +1,13 @@
-import requests
+from core.base_agent import BaseAgent
+from core.context_manager import summarize_recent
+from core.provider_router import route_llm
 
-OLLAMA_URL = "http://localhost:11434/api/generate"
-MODEL = "qwen2.5-coder:7b"
 
+class FrontendEngineerAgent(BaseAgent):
 
-def diseñar_frontend(goal):
-
-    prompt = f"""
+    def execute(self, goal):
+        context = summarize_recent()
+        prompt = f"""
 Eres un ingeniero frontend experto.
 
 Stack obligatorio:
@@ -27,19 +28,11 @@ Debes devolver:
 3) Páginas de Next.js
 4) Integración con API backend
 
+Contexto reciente del proyecto:
+{context}
+
 Objetivo:
 {goal}
 """
 
-    response = requests.post(
-        OLLAMA_URL,
-        json={
-            "model": MODEL,
-            "prompt": prompt,
-            "stream": False
-        }
-    )
-
-    data = response.json()
-
-    return data.get("response", "")
+        return route_llm("frontend_engineer", prompt)

@@ -1,29 +1,12 @@
 import json
-import requests
-
 from core.agent_loader import load_agents
+from core.llm_client import ask_llm
 from core.project_scanner import scan_project
 from core.memory_manager import add_completed_task
 from core.git_manager import git_commit
 
-OLLAMA_URL = "http://localhost:11434/api/generate"
-MODEL = "qwen2.5-coder:7b"
-
-
 def ask_qwen(prompt):
-
-    response = requests.post(
-        OLLAMA_URL,
-        json={
-            "model": MODEL,
-            "prompt": prompt,
-            "stream": False
-        }
-    )
-
-    data = response.json()
-
-    return data.get("response", "")
+    return ask_llm(prompt)
 
 
 def crear_plan(goal, agents):
