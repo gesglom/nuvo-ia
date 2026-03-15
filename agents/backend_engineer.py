@@ -1,17 +1,12 @@
-import requests
-import os
+from core.base_agent import BaseAgent
+from core.context_manager import summarize_recent
+from core.provider_router import route_llm
 
 
-OLLAMA_URL = "http://localhost:11434/api/generate"
-MODEL = "qwen2.5-coder:7b"
-
-WORKSPACE = "workspace/nuvo_backend"
-
-
-class BackendEngineerAgent:
+class BackendEngineerAgent(BaseAgent):
 
     def execute(self, goal):
-
+        context = summarize_recent()
         prompt = f"""
 Eres un ingeniero backend experto en Python y FastAPI.
 
@@ -24,19 +19,11 @@ FILE: nombre_del_archivo.py
 CODE:
 codigo completo del archivo
 
+Contexto reciente del proyecto:
+{context}
+
 Tarea:
 {goal}
 """
 
-        response = requests.post(
-            OLLAMA_URL,
-            json={
-                "model": MODEL,
-                "prompt": prompt,
-                "stream": False
-            }
-        )
-
-        data = response.json()
-
-        return data.get("response", "")
+        return route_llm("backend_engineer", prompt)
