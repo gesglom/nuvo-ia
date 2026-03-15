@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nuvo Cloud · SaaS Ops</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="layout">
+      <aside class="sidebar">
+        <h2>Nuvo Cloud</h2>
+        <p class="muted">Control plane SaaS</p>
+        <nav>
+          <button class="nav-btn" data-view="overview">Overview</button>
+          <button class="nav-btn" data-view="jobs">Jobs</button>
+          <button class="nav-btn" data-view="agents">Agents</button>
+          <button class="nav-btn" data-view="governance">Governance</button>
+        </nav>
+      </aside>
+
+      <main class="content">
+        <header class="topbar">
+          <h1>Fábrica de Software Autónoma</h1>
+          <span class="badge">Enterprise Beta</span>
+        </header>
+
+        <section class="cards" id="kpis">
+          <article class="card"><h3>Jobs</h3><p id="kpiJobs">-</p></article>
+          <article class="card"><h3>Agentes</h3><p id="kpiAgents">-</p></article>
+          <article class="card"><h3>Success</h3><p id="kpiSuccess">-</p></article>
+          <article class="card"><h3>Latencia</h3><p id="kpiLatency">-</p></article>
+        </section>
+
+        <section class="card">
+          <h2>Crear Job SaaS</h2>
+          <div class="row">
+            <textarea id="goal" rows="3" placeholder="Ej: Plataforma CRM multi-tenant con billing"></textarea>
+            <button id="createJobBtn">Crear job</button>
+            <button id="refreshBtn">Actualizar dashboard</button>
+          </div>
+        </section>
+
+        <section class="grid-2">
+          <article class="card">
+            <h2>Jobs</h2>
+            <div id="jobsTable"></div>
+          </article>
+          <article class="card">
+            <h2>Operaciones</h2>
+            <div class="stack">
+              <button id="providersBtn">Ver proveedores</button>
+              <button id="metricsBtn">Ver métricas</button>
+              <button id="smokeBtn">Smoke test agentes</button>
+              <button id="selfImproveBtn">Self-improvement</button>
+            </div>
+            <pre id="resultBox"></pre>
+          </article>
+        </section>
+      </main>
+    </div>
+
+    <script src="/app.js"></script>
+  </body>
+</html>
