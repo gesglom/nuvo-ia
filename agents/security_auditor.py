@@ -1,6 +1,9 @@
-﻿class SecurityAuditor:
+from core.base_agent import BaseAgent
+
+
+class SecurityAuditorAgent(BaseAgent):
     def __init__(self):
-        self.dangerous_commands = ['rm -rf', 'eval', 'os.system']
+        self.dangerous_commands = ["rm -rf", "eval", "os.system"]
 
     def scan_text(self, text):
         results = []
@@ -9,6 +12,10 @@
                 results.append(f"Potential danger found: {command}")
         return results
 
-if __name__ == '__main__':
-    auditor = SecurityAuditor()
-    print('Auditor de Nuvo activo y verificado.')
+    def execute(self, text):
+        return self.scan_text(text)
+
+
+if __name__ == "__main__":
+    auditor = SecurityAuditorAgent()
+    print("Auditor de Nuvo activo y verificado.")

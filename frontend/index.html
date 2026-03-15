@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nuvo IA Console</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <header>
+        <h1>Nuvo IA · Frontend MVP</h1>
+        <p>Orquesta agentes autónomos con múltiples proveedores de IA.</p>
+      </header>
+
+      <section class="card">
+        <label for="goal">Objetivo del proyecto</label>
+        <textarea id="goal" rows="4" placeholder="Ej: Crear un SaaS con backend en FastAPI y dashboard en React"></textarea>
+        <div class="row">
+          <button id="loadAgentsBtn">Cargar agentes</button>
+          <button id="planBtn">Generar plan</button>
+          <button id="providersBtn">Ver proveedores</button>
+        </div>
+      </section>
+
+      <section class="grid">
+        <article class="card">
+          <h2>Agentes disponibles</h2>
+          <ul id="agentsList"></ul>
+        </article>
+
+        <article class="card">
+          <h2>Plan generado</h2>
+          <div id="planContainer"></div>
+        </article>
+      </section>
+
+      <section class="card">
+        <h2>Ejecución manual de agente</h2>
+        <div class="row row-wrap">
+          <input id="agentName" type="text" placeholder="Nombre agente (ej: architect_agent)" />
+          <input id="agentTask" type="text" placeholder="Tarea" />
+          <button id="runAgentBtn">Ejecutar</button>
+        </div>
+        <pre id="resultBox"></pre>
+      </section>
+    </main>
+
+    <script src="/app.js"></script>
+  </body>
+</html>
