@@ -18,8 +18,19 @@ TASK_TIMEOUT_SECONDS = 120
 def _build_tasks(goal, plan, available_agents=None):
     tasks = []
     available = set(available_agents) if available_agents else None
-    normalized = dedupe_agent_plan(plan)
+
+    if isinstance(plan, str):
+        plan_items = [x.strip() for x in plan.split(",") if x.strip()]
+    else:
+        plan_items = list(plan or [])
+
+    normalized = dedupe_agent_plan(plan_items)
     normalized_plan = [x for x in normalized if not available or x in available]
+
+    if not normalized_plan and available:
+        fallback = "architect_agent" if "architect_agent" in available else next(iter(available))
+        normalized_plan = [fallback]
+
     for priority, step in enumerate(normalized_plan):
         tasks.append(
             TaskContract(

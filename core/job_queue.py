@@ -3,6 +3,17 @@ import os
 from datetime import datetime
 from typing import Dict, List, Optional
 
+
+def _priority_value(task: Dict) -> int:
+    raw = task.get("priority", 100)
+    if isinstance(raw, bool):
+        return 100
+    if isinstance(raw, int):
+        return raw
+    if isinstance(raw, str) and raw.strip().isdigit():
+        return int(raw.strip())
+    return 100
+
 from core.task_contract import TaskContract
 
 JOBS_FILE = "memory/jobs.json"
@@ -77,7 +88,7 @@ def next_pending_task(job_id: str) -> Optional[TaskContract]:
 
         pending_tasks.sort(
             key=lambda t: (
-                t.get("priority", 100),
+                _priority_value(t),
                 t.get("created_at", ""),
             )
         )
