@@ -3,7 +3,9 @@ import sys
 
 sys.path.append(os.getcwd())
 
+from core.agent_evolution import run_evolution_cycle
 from core.job_queue import create_job, get_job
+from core.memory_fabric import retrieve_context, store_episode
 from core.metrics_manager import add_metric, summary
 from core.self_improvement import register_feedback, list_suggestions
 from core.task_contract import TaskContract
@@ -27,6 +29,15 @@ def main():
     register_feedback("backend_engineer", "crear api", "failed", "error de timeout")
     suggestions = list_suggestions()
     assert len(suggestions) >= 1
+
+    # Memoria unificada (local fallback)
+    store_episode("architect_agent", "crear arquitectura", "resultado de prueba", status="completed")
+    ctx = retrieve_context("arquitectura", agent="architect_agent", limit=3)
+    assert isinstance(ctx, str)
+
+    # Evolución de agentes
+    evo = run_evolution_cycle(["architect_agent", "backend_engineer"])
+    assert "agents" in evo
 
     # Seguridad de herramientas
     assert can_write_path("workspace/nuvo_backend/main.py")

@@ -1,12 +1,12 @@
 from core.base_agent import BaseAgent
-from core.context_manager import summarize_recent
+from core.memory_fabric import retrieve_context
 from core.provider_router import route_llm
 
 
 class BackendEngineerAgent(BaseAgent):
 
     def execute(self, goal):
-        context = summarize_recent()
+        context = retrieve_context(goal, agent="backend_engineer")
         prompt = f"""
 Eres un ingeniero backend experto en Python y FastAPI.
 

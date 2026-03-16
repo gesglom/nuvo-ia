@@ -43,14 +43,14 @@ class AgentCreatorAgent(BaseAgent):
 
     def _render_agent_code(self, class_name: str, specialty: str, module_name: str):
         return f'''from core.base_agent import BaseAgent
-from core.context_manager import summarize_recent
+from core.memory_fabric import retrieve_context
 from core.provider_router import route_llm
 
 
 class {class_name}(BaseAgent):
 
     def execute(self, goal):
-        context = summarize_recent()
+        context = retrieve_context(goal, agent="{module_name}")
         prompt = f"""
 Eres un especialista en {specialty} dentro de una fábrica de software multi-agente.
 
