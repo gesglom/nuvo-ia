@@ -1,3 +1,4 @@
+import json
 import os
 import sys
 
@@ -10,7 +11,7 @@ from core.agent_registry import AgentRegistry
 from core.event_bus import EventBus
 from core.task_queue import TaskQueue
 from tools.repo_analyzer import analyze_repository
-from core.job_queue import _load, _save, create_job, get_job, next_pending_task
+from core.job_queue import JOBS_FILE, create_job, get_job, next_pending_task
 from core.memory_fabric import retrieve_context, store_episode
 from core.metrics_manager import add_metric, summary
 from core.self_improvement import register_feedback, list_suggestions
@@ -63,19 +64,23 @@ def main():
     )
     loaded_legacy = get_job(legacy_job["job_id"])
     loaded_legacy["tasks"][0]["priority"] = "1"
-    all_jobs = {
-        "jobs": [
-            j if j.get("job_id") != legacy_job["job_id"] else loaded_legacy
-            for j in _load().get("jobs", [])
-        ]
-    }
-    _save(all_jobs)
+    with open(JOBS_FILE, "r", encoding="utf-8") as f:
+        all_jobs = json.load(f)
+    all_jobs["jobs"] = [
+        j if j.get("job_id") != legacy_job["job_id"] else loaded_legacy
+        for j in all_jobs.get("jobs", [])
+    ]
+    with open(JOBS_FILE, "w", encoding="utf-8") as f:
+        json.dump(all_jobs, f, indent=2, ensure_ascii=False)
     picked = next_pending_task(legacy_job["job_id"])
     assert picked.owner_agent == "architect_agent"
 
     # _build_tasks robusto para plan string + fallback
     built_from_string = _build_tasks("goal", "arquitecto, backend_engineer")
     assert [t.owner_agent for t in built_from_string] == ["architect_agent", "backend_engineer"]
+
+    built_from_dicts = _build_tasks("goal", [{"agent": "arquitecto"}, {"agent": "backend_engineer"}])
+    assert [t.owner_agent for t in built_from_dicts] == ["architect_agent", "backend_engineer"]
 
     # Framework core incremental
     registry = AgentRegistry()

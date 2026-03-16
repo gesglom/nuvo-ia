@@ -3,6 +3,10 @@ import os
 from datetime import datetime
 from typing import Dict, List, Optional
 
+from core.task_contract import TaskContract
+
+JOBS_FILE = "memory/jobs.json"
+
 
 def _priority_value(task: Dict) -> int:
     raw = task.get("priority", 100)
@@ -13,10 +17,6 @@ def _priority_value(task: Dict) -> int:
     if isinstance(raw, str) and raw.strip().isdigit():
         return int(raw.strip())
     return 100
-
-from core.task_contract import TaskContract
-
-JOBS_FILE = "memory/jobs.json"
 
 
 def _ensure():

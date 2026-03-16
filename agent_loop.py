@@ -20,15 +20,23 @@ def _build_tasks(goal, plan, available_agents=None):
     available = set(available_agents) if available_agents else None
 
     if isinstance(plan, str):
-        plan_items = [x.strip() for x in plan.split(",") if x.strip()]
+        raw_items = [x.strip() for x in plan.split(",") if x.strip()]
     else:
-        plan_items = list(plan or [])
+        raw_items = list(plan or [])
+
+    plan_items = []
+    for item in raw_items:
+        if isinstance(item, dict):
+            plan_items.append(item.get("agent", ""))
+        else:
+            plan_items.append(item)
 
     normalized = dedupe_agent_plan(plan_items)
     normalized_plan = [x for x in normalized if not available or x in available]
 
     if not normalized_plan and available:
-        fallback = "architect_agent" if "architect_agent" in available else next(iter(available))
+        ordered = sorted(available)
+        fallback = "architect_agent" if "architect_agent" in available else ordered[0]
         normalized_plan = [fallback]
 
     for priority, step in enumerate(normalized_plan):
