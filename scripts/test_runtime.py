@@ -3,6 +3,7 @@ import sys
 
 sys.path.append(os.getcwd())
 
+from agent_loop import _build_tasks
 from core.agent_catalog import dedupe_agent_plan
 from core.agent_evolution import run_evolution_cycle
 from core.agent_registry import AgentRegistry
@@ -47,6 +48,10 @@ def main():
     # Catálogo de agentes: normalización/deduplicación ES-EN
     deduped = dedupe_agent_plan(["architect_agent", "arquitecto", "backend_engineer", "ingeniero_backend"])
     assert deduped == ["architect_agent", "backend_engineer"]
+
+    # Compatibilidad _build_tasks (firma legacy con 2 args)
+    built = _build_tasks("goal", ["architect_agent", "arquitecto", "backend_engineer"])
+    assert [t.owner_agent for t in built] == ["architect_agent", "backend_engineer"]
 
     # Framework core incremental
     registry = AgentRegistry()

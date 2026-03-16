@@ -15,9 +15,11 @@ MAX_RETRIES = 2
 TASK_TIMEOUT_SECONDS = 120
 
 
-def _build_tasks(goal, plan, available_agents):
+def _build_tasks(goal, plan, available_agents=None):
     tasks = []
-    normalized_plan = [x for x in dedupe_agent_plan(plan) if x in available_agents]
+    available = set(available_agents) if available_agents else None
+    normalized = dedupe_agent_plan(plan)
+    normalized_plan = [x for x in normalized if not available or x in available]
     for priority, step in enumerate(normalized_plan):
         tasks.append(
             TaskContract(

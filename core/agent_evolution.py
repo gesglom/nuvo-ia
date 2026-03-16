@@ -109,4 +109,8 @@ def _write_manifest_evolution(agent_name: str, health: float, recommendation: st
             "updated_at": datetime.utcnow().isoformat(),
         },
     }
-    write_manifest(agent_name, updated)
+    try:
+        write_manifest(agent_name, updated)
+    except Exception:
+        # No interrumpir el runtime por manifest legacy o inválido.
+        return
