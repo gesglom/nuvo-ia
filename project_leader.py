@@ -1,5 +1,17 @@
 from core.agent_loader import load_agents
-from core.ollama_client import ask_llm
+from core.llm_client import ask_llm
+
+
+DEFAULT_EXECUTION_ORDER = [
+    "architect_agent",
+    "backend_engineer",
+    "frontend_engineer",
+    "security_auditor",
+]
+
+
+def _fallback_plan(agents):
+    return [agent for agent in DEFAULT_EXECUTION_ORDER if agent in agents]
 
 
 def create_plan(goal, agents):
@@ -27,10 +39,12 @@ architect_agent, backend_engineer, security_auditor
 """
 
     response = ask_llm(prompt)
+    if not isinstance(response, str) or response.startswith("Error"):
+        return _fallback_plan(agents)
 
-    plan = [x.strip() for x in response.split(",")]
-
-    return plan
+    proposed = [x.strip() for x in response.split(",") if x.strip()]
+    plan = [agent for agent in proposed if agent in agents]
+    return plan or _fallback_plan(agents)
 
 
 def run_project(goal):
@@ -73,4 +87,3 @@ if __name__ == "__main__":
     goal = input("Describe el sistema que deseas crear: ")
 
     run_project(goal)
-

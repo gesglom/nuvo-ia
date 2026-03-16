@@ -10,6 +10,7 @@ from core.metrics_manager import add_metric, summary
 from core.self_improvement import register_feedback, list_suggestions
 from core.task_contract import TaskContract
 from core.tool_policy import can_write_path, is_command_allowed
+from core.llm_client import ask_llm
 
 
 def main():
@@ -38,6 +39,10 @@ def main():
     # Evolución de agentes
     evo = run_evolution_cycle(["architect_agent", "backend_engineer"])
     assert "agents" in evo
+
+    # LLM localdev para arranque sin infraestructura externa
+    response = ask_llm("responde algo", provider="localdev")
+    assert isinstance(response, str) and len(response) > 0
 
     # Seguridad de herramientas
     assert can_write_path("workspace/nuvo_backend/main.py")

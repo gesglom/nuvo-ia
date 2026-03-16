@@ -26,6 +26,15 @@ def _save(data: Dict):
         json.dump(data, f, indent=2, ensure_ascii=False)
 
 
+def _priority_value(task: Dict) -> int:
+    value = task.get("priority", 100)
+    if type(value) is int:
+        return value
+    if isinstance(value, str) and value.strip().isdigit():
+        return int(value.strip())
+    return 100
+
+
 def create_job(goal: str, tasks: List[TaskContract]) -> Dict:
     data = _load()
     job = {
@@ -77,7 +86,7 @@ def next_pending_task(job_id: str) -> Optional[TaskContract]:
 
         pending_tasks.sort(
             key=lambda t: (
-                t.get("priority", 100),
+                _priority_value(t),
                 t.get("created_at", ""),
             )
         )
