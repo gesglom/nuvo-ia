@@ -15,12 +15,13 @@ TASK_TIMEOUT_SECONDS = 120
 
 def _build_tasks(goal, plan):
     tasks = []
-    for step in plan:
+    for priority, step in enumerate(plan):
         tasks.append(
             TaskContract(
                 owner_agent=step,
                 input=goal,
                 expected_output=f"Salida útil del agente {step} para avanzar objetivo",
+                priority=priority,
             )
         )
     return tasks
