@@ -1,8 +1,10 @@
 import time
 from concurrent.futures import ThreadPoolExecutor, TimeoutError
 
+from core.agent_catalog import dedupe_agent_plan
 from core.agent_loader import load_agents
-from core.context_manager import add_context_event
+from core.agent_evolution import run_evolution_cycle
+from core.memory_fabric import store_episode
 from core.job_queue import create_job, get_job, next_pending_task, update_task
 from core.metrics_manager import add_metric
 from core.self_improvement import register_feedback
@@ -13,14 +15,16 @@ MAX_RETRIES = 2
 TASK_TIMEOUT_SECONDS = 120
 
 
-def _build_tasks(goal, plan):
+def _build_tasks(goal, plan, available_agents):
     tasks = []
-    for step in plan:
+    normalized_plan = [x for x in dedupe_agent_plan(plan) if x in available_agents]
+    for priority, step in enumerate(normalized_plan):
         tasks.append(
             TaskContract(
                 owner_agent=step,
                 input=goal,
                 expected_output=f"Salida útil del agente {step} para avanzar objetivo",
+                priority=priority,
             )
         )
     return tasks
@@ -44,7 +48,7 @@ def _invoke_specialist(agents, failed_task, error_message):
             f"Resolver bloqueo en tarea '{failed_task.input}'. Error previo: {error_message}"
         )
         latency_ms = int((time.perf_counter() - start) * 1000)
-        add_context_event(new_agent_name, failed_task.input, str(result), status="recovered")
+        store_episode(new_agent_name, failed_task.input, str(result), status="recovered", metadata={"source": "specialist_recovery"})
         add_metric(new_agent_name, "dynamic", "done", latency_ms)
         return new_agent_name, result
 
@@ -76,7 +80,7 @@ def run_job(job_id):
             task.output = str(result)
             task.status = "done"
             task.error = ""
-            add_context_event(task.owner_agent, task.input, task.output, status="completed")
+            store_episode(task.owner_agent, task.input, task.output, status="completed", metadata={"job_id": job_id, "task_id": task.task_id})
         except TimeoutError:
             task.retries += 1
             task.error = f"timeout después de {TASK_TIMEOUT_SECONDS}s"
@@ -98,6 +102,7 @@ def run_job(job_id):
 
         update_task(job_id, task)
 
+    run_evolution_cycle(list(agents.keys()))
     return get_job(job_id)
 
 
@@ -107,7 +112,7 @@ def start_nuvo_flow(goal):
     agents = load_agents()
     plan = create_plan(goal, agents)
 
-    tasks = _build_tasks(goal, plan)
+    tasks = _build_tasks(goal, plan, set(agents.keys()))
     job = create_job(goal, tasks)
     final_job = run_job(job["job_id"])
 

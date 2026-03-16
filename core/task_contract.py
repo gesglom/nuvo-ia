@@ -20,12 +20,17 @@ class TaskContract:
     error: str = ""
     provider_used: str = ""
     latency_ms: int = 0
+    priority: int = 100
 
     def validate(self):
         if not self.owner_agent:
             raise ValueError("owner_agent es requerido")
         if self.status not in VALID_STATUS:
             raise ValueError(f"status inválido: {self.status}")
+        if type(self.priority) is not int:
+            raise ValueError("priority debe ser un entero")
+        if self.priority < 0:
+            raise ValueError("priority debe ser mayor o igual a 0")
 
     def to_dict(self) -> Dict[str, Any]:
         self.validate()
@@ -42,7 +47,16 @@ class TaskContract:
             "error": self.error,
             "provider_used": self.provider_used,
             "latency_ms": self.latency_ms,
+            "priority": self.priority,
         }
+
+    @staticmethod
+    def _normalize_priority(value: Any) -> int:
+        if type(value) is int:
+            return value
+        if isinstance(value, str) and value.strip().isdigit():
+            return int(value.strip())
+        raise ValueError("priority inválido; debe ser entero")
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]):
@@ -59,6 +73,7 @@ class TaskContract:
             error=data.get("error", ""),
             provider_used=data.get("provider_used", ""),
             latency_ms=data.get("latency_ms", 0),
+            priority=cls._normalize_priority(data.get("priority", 100)),
         )
         obj.validate()
         return obj
