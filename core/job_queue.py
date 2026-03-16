@@ -65,22 +65,42 @@ def _update_job(job_id: str, updater):
 
 
 def next_pending_task(job_id: str) -> Optional[TaskContract]:
+    selected_task_id = None
+
     def updater(job):
+        nonlocal selected_task_id
+        pending_tasks = [
+            t for t in job.get("tasks", []) if t.get("status") == "pending"
+        ]
+        if not pending_tasks:
+            return
+
+        pending_tasks.sort(
+            key=lambda t: (
+                t.get("priority", 100),
+                t.get("created_at", ""),
+            )
+        )
+        selected_task_id = pending_tasks[0].get("task_id")
+
         for t in job.get("tasks", []):
-            if t.get("status") == "pending":
+            if t.get("task_id") == selected_task_id:
                 t["status"] = "running"
                 t["updated_at"] = datetime.utcnow().isoformat()
                 job["status"] = "running"
-                job["__picked_task"] = t
                 break
 
+        # Limpieza por compatibilidad: evita persistir artefactos de selección temporal.
+        job.pop("__picked_task", None)
+
     job = _update_job(job_id, updater)
-    if not job:
+    if not job or not selected_task_id:
         return None
-    picked = job.get("__picked_task")
-    if not picked:
-        return None
-    return TaskContract.from_dict(picked)
+
+    for task in job.get("tasks", []):
+        if task.get("task_id") == selected_task_id:
+            return TaskContract.from_dict(task)
+    return None
 
 
 def update_task(job_id: str, task: TaskContract):

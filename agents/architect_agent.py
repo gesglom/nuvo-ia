@@ -1,12 +1,12 @@
 from core.base_agent import BaseAgent
-from core.context_manager import summarize_recent
+from core.memory_fabric import retrieve_context
 from core.provider_router import route_llm
 
 
 class ArchitectAgent(BaseAgent):
 
     def execute(self, goal):
-        context = summarize_recent()
+        context = retrieve_context(goal, agent="architect_agent")
         prompt = f"""
 Eres un arquitecto senior de software.
 
