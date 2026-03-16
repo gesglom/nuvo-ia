@@ -1,6 +1,7 @@
 import json
 import os
 import sys
+from pathlib import Path
 
 sys.path.append(os.getcwd())
 
@@ -98,6 +99,12 @@ def main():
 
     repo_report = analyze_repository(".")
     assert "modules" in repo_report
+
+    # Guardrail: no merge conflict markers in critical runtime files
+    conflict_markers = ("<" * 7, "=" * 7, ">" * 7)
+    for critical in ["agent_loop.py", "core/agent_evolution.py", "core/job_queue.py", "scripts/test_runtime.py"]:
+        content = Path(critical).read_text(encoding="utf-8")
+        assert not any(marker in content for marker in conflict_markers), f"conflict markers found in {critical}"
 
     # Seguridad de herramientas
     assert can_write_path("workspace/nuvo_backend/main.py")
