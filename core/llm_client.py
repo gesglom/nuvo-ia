@@ -95,6 +95,46 @@ def _call_anthropic(prompt: str) -> str:
     return ""
 
 
+def _call_localdev(prompt: str) -> str:
+    lower = prompt.lower()
+
+    if "responde solo con una lista separada por comas" in lower:
+        return "architect_agent, backend_engineer, frontend_engineer, security_auditor"
+
+    if "file:" in lower and "codigo" in lower:
+        return (
+            "FILE: app/main.py\n"
+            "CODE:\n"
+            "from fastapi import FastAPI\n\n"
+            "app = FastAPI(title='Nuvo API')\n\n"
+            "@app.get('/health')\n"
+            "def health():\n"
+            "    return {'status': 'ok'}\n"
+        )
+
+    if "arquitecto senior de software" in lower:
+        return (
+            "Arquitectura propuesta:\n"
+            "- backend FastAPI en /app\n"
+            "- frontend Next.js en /frontend\n"
+            "- capa de agentes en /agents\n"
+            "- memoria y métricas en /memory\n"
+        )
+
+    if "ingeniero frontend" in lower:
+        return (
+            "1) Estructura: frontend/app, frontend/components, frontend/lib\n"
+            "2) Componentes: TaskBoard, AgentStatus, LogStream\n"
+            "3) Páginas: /, /jobs/[id], /settings\n"
+            "4) Integración: fetch a /api/jobs y /api/metrics\n"
+        )
+
+    return (
+        "Modo localdev activo.\n"
+        "Entrega incremental recomendada: crear endpoint /health, cola de jobs y runner básico."
+    )
+
+
 def ask_llm(prompt: str, provider: Optional[str] = None) -> str:
     selected = (provider or _provider_from_env()).lower()
 
@@ -107,6 +147,8 @@ def ask_llm(prompt: str, provider: Optional[str] = None) -> str:
             return _call_openai_compatible_custom(prompt)
         if selected == "anthropic":
             return _call_anthropic(prompt)
+        if selected in {"localdev", "mock", "local"}:
+            return _call_localdev(prompt)
     except error.URLError as exc:
         return f"Error conectando con proveedor '{selected}': {exc}"
     except LLMError as exc:
@@ -116,7 +158,7 @@ def ask_llm(prompt: str, provider: Optional[str] = None) -> str:
 
     return (
         f"Proveedor '{selected}' no soportado. "
-        "Usa NUVO_LLM_PROVIDER=ollama|openai|openai_compatible|anthropic"
+        "Usa NUVO_LLM_PROVIDER=ollama|openai|openai_compatible|anthropic|localdev"
     )
 
 
@@ -140,6 +182,10 @@ def provider_status():
             "anthropic": {
                 "configured": bool(os.getenv("ANTHROPIC_API_KEY")),
                 "model": os.getenv("ANTHROPIC_MODEL", "claude-3-5-haiku-latest"),
+            },
+            "localdev": {
+                "configured": True,
+                "model": "rule-based",
             },
         },
     }
